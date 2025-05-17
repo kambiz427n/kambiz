@@ -1,0 +1,169 @@
+/* Add rules for Persian font family */
+body, html {
+  font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  direction: rtl;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Logo styles */
+.app-logo {
+  height: 40px;
+  margin-left: 16px;
+}
+
+/* Custom styles for dashboard */
+.dashboard-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.menu-item-text {
+  font-weight: 500;
+}
+
+.user-info {
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+/* Add hover effects and transitions to elements */
+
+/* Global transition for all interactive elements */
+button, 
+a, 
+.MuiListItem-root, 
+.MuiIconButton-root, 
+.MuiDrawer-root .MuiListItem-button,
+.MuiMenuItem-root {
+  transition: all 0.3s ease !important;
+}
+
+/* Hover effect for buttons and icons */
+button:hover, 
+.MuiButton-root:hover, 
+.MuiIconButton-root:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Hover effect for menu items */
+.MuiListItem-button:hover {
+  background-color: rgba(46, 125, 50, 0.1) !important;
+  transform: translateX(-5px) !important;
+  border-right: 4px solid #2e7d32 !important;
+}
+
+/* Logo hover effect */
+/* .MuiBox-root:hover {
+  filter: brightness(1.1);
+} */
+
+/* Add subtle pulse animation to badges */
+.MuiBadge-badge {
+  transition: all 0.3s ease !important;
+}
+
+.MuiBadge-badge:hover {
+  transform: scale(1.2) !important;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 0, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(220, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 0, 0, 0);
+  }
+}
+
+/* Table row hover effect */
+.MuiTableRow-root {
+  transition: all 0.2s ease-in-out !important;
+  position: relative !important;
+}
+
+.MuiTableRow-root:hover {
+  background-color: rgba(46, 125, 50, 0.15) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  z-index: 1 !important;
+  border-left: 4px solid #2e7d32 !important;
+}
+
+/* Input field hover effects */
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #2e7d32 !important;
+  border-width: 2px !important;
+}
+
+/* Dialog hover effects */
+.MuiDialog-paper {
+  transition: all 0.3s ease !important;
+}
+
+.MuiDialog-paper:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Zebra-striping for table rows */
+.MuiTableRow-root:nth-of-type(even) {
+  background-color: #f9f9f9;
+}
+
+/* Rounded corners for paper, buttons, and inputs */
+.MuiPaper-root, .MuiButton-root, .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+}
+
+/* Enhanced hover effect for cards/paper */
+.MuiPaper-root:hover {
+  box-shadow: 0 8px 24px rgba(46, 125, 50, 0.12) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+}
+
+/* Error message style */
+.MuiFormHelperText-root.Mui-error {
+  color: #d32f2f !important;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 600px) {
+  .dashboard-title {
+    font-size: 1rem;
+  }
+  .MuiPaper-root {
+    padding: 8px !important;
+  }
+  .MuiButton-root {
+    font-size: 0.95rem !important;
+    padding: 8px 12px !important;
+  }
+}
+
+/* Custom scrollbar for tables and dialogs */
+.MuiTableContainer-root, .MuiDialogContent-root {
+  scrollbar-width: thin;
+  scrollbar-color: #2e7d32 #f5f5f5;
+}
+.MuiTableContainer-root::-webkit-scrollbar, .MuiDialogContent-root::-webkit-scrollbar {
+  width: 8px;
+  background: #f5f5f5;
+}
+.MuiTableContainer-root::-webkit-scrollbar-thumb, .MuiDialogContent-root::-webkit-scrollbar-thumb {
+  background: #2e7d32;
+  border-radius: 8px;
+} 

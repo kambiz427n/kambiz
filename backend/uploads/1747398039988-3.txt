@@ -1,0 +1,104 @@
+//@version=5
+strategy("🚀 استراتژی ساده‌شده (1h / 15m / 5m)", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
+
+// فقط تایم‌فریم‌های مشخص‌شده مجاز باشن
+isValidTimeframe = (timeframe.period == "60" or timeframe.period == "15" or timeframe.period == "5")
+if not isValidTimeframe
+    runtime.error("⛔ این استراتژی فقط روی تایم‌فریم‌های 1h، 15m یا 5m کار می‌کند")
+
+// === ورودی‌ها === //
+rsiPeriod = input.int(14, title="RSI Period")
+rsiOverbought = input.int(70, title="RSI Overbought Level", minval=50, maxval=100)
+rsiOversold = input.int(30, title="RSI Oversold Level", minval=0, maxval=50)
+macdFast = input.int(12, title="MACD Fast")
+macdSlow = input.int(26, title="MACD Slow")
+macdSignal = input.int(9, title="MACD Signal")
+emaFastLen = input.int(5, title="EMA Fast")
+emaSlowLen = input.int(13, title="EMA Slow")
+cciPeriod = input.int(20, title="CCI Period")
+cciOverbought = input.int(150, title="CCI Overbought Level", minval=100, maxval=300)
+cciOversold = input.int(-100, title="CCI Oversold Level", minval=-300, maxval=0)
+supertrendFactor = input.float(3.0, title="Supertrend Multiplier")
+supertrendATR = input.int(10, title="Supertrend ATR Length")
+atrLength = input.int(14, title="ATR Length")
+atrMultiplierTP = input.float(3.0, title="ATR TP Multiplier")
+atrMultiplierSL = input.float(1.0, title="ATR SL Multiplier")
+useDynamicLevels = input.bool(true, title="Use Dynamic TP/SL Levels")
+lookback = input.int(10, title="Lookback for Dynamic Levels")
+minScore = input.int(1, title="Minimum Score for Signal", minval=1, maxval=5)
+
+// === اندیکاتورها === //
+rsi = ta.rsi(close, rsiPeriod)
+[macdLine, signalLine, _] = ta.macd(close, macdFast, macdSlow, macdSignal)
+emaFast = ta.ema(close, emaFastLen)
+emaSlow = ta.ema(close, emaSlowLen)
+cci = ta.cci(close, cciPeriod)
+[supertrend, trendDir] = ta.supertrend(supertrendFactor, supertrendATR)
+atr = ta.atr(atrLength)
+highestHigh = ta.highest(high, lookback)
+lowestLow = ta.lowest(low, lookback)
+
+// === ورود خرید === //
+buyScore = 0
+buyScore += rsi < rsiOversold ? 1 : 0
+buyScore += ta.crossover(macdLine, signalLine) ? 1 : 0
+buyScore += ta.crossover(emaFast, emaSlow) ? 1 : 0
+buyScore += cci < cciOversold ? 1 : 0
+buyScore += trendDir == 1 ? 1 : 0
+
+var float lastBuyPrice = na
+var float lastSellPrice = na
+buyAllowed = na(lastBuyPrice) or close < lastBuyPrice * 0.995
+buySignal = buyScore >= minScore and buyScore[1] < minScore and buyAllowed
+
+// === ورود فروش === //
+sellScore = 0
+sellScore += rsi > rsiOverbought ? 1 : 0
+sellScore += ta.crossunder(macdLine, signalLine) ? 1 : 0
+sellScore += ta.crossunder(emaFast, emaSlow) ? 1 : 0
+sellScore += cci > cciOverbought ? 1 : 0
+sellScore += trendDir == -1 ? 1 : 0
+
+sellAllowed = na(lastSellPrice) or close > lastSellPrice * 1.005
+sellSignal = sellScore >= minScore and sellScore[1] < minScore and sellAllowed
+
+// === ورود و خروج با TP/SL === //
+var float longTP = na
+var float longSL = na
+var float shortTP = na
+var float shortSL = na
+
+if buySignal
+    longTP := useDynamicLevels ? highestHigh : close + atr * atrMultiplierTP
+    longSL := useDynamicLevels ? lowestLow : close - atr * atrMultiplierSL
+    lastBuyPrice := close
+    lastSellPrice := na
+    strategy.entry("🟢 خرید", strategy.long)
+    strategy.exit("📤 TP/SL Buy", from_entry="🟢 خرید", limit=longTP, stop=longSL)
+
+if sellSignal
+    shortTP := useDynamicLevels ? lowestLow : close - atr * atrMultiplierTP
+    shortSL := useDynamicLevels ? highestHigh : close + atr * atrMultiplierSL
+    lastSellPrice := close
+    lastBuyPrice := na
+    strategy.entry("🔴 فروش", strategy.short)
+    strategy.exit("📤 TP/SL Sell", from_entry="🔴 فروش", limit=shortTP, stop=shortSL)
+
+// === آلارم‌ها === //
+alertcondition(buySignal, title="📈 سیگنال خرید", message="📈 ورود خرید در {{ticker}} - قیمت: {{close}}")
+alertcondition(sellSignal, title="📉 سیگنال فروش", message="📉 ورود فروش در {{ticker}} - قیمت: {{close}}")
+
+// === نمایش تصویری نقاط ورود === //
+plotshape(buySignal, title="ورود خرید", location=location.belowbar, color=color.lime, style=shape.triangleup, size=size.large, text="Buy")
+plotshape(sellSignal, title="ورود فروش", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.large, text="Sell")
+
+// === نمایش خطوط TP و SL === //
+plot(strategy.position_size > 0 ? longTP : na, title="🎯 TP Buy", color=color.green, style=plot.style_linebr, linewidth=1)
+plot(strategy.position_size > 0 ? longSL : na, title="🛑 SL Buy", color=color.red, style=plot.style_linebr, linewidth=1)
+plot(strategy.position_size < 0 ? shortTP : na, title="🎯 TP Sell", color=color.green, style=plot.style_linebr, linewidth=1)
+plot(strategy.position_size < 0 ? shortSL : na, title="🛑 SL Sell", color=color.red, style=plot.style_linebr, linewidth=1)
+
+// === خطوط EMA و Supertrend برای زمینه دید بیشتر === //
+plot(emaFast, title="EMA Fast", color=color.orange)
+plot(emaSlow, title="EMA Slow", color=color.blue)
+plot(supertrend, title="Supertrend", color=trendDir == 1 ? color.green : color.red, linewidth=2)
