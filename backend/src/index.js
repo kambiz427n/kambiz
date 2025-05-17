@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -13,7 +14,7 @@ const jwt = require('jsonwebtoken');
 const User = require('./models/user');
 const bcrypt = require('bcrypt');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 // بررسی اینکه JWT_SECRET تنظیم شده باشد
 if (!process.env.JWT_SECRET) {
@@ -34,6 +35,9 @@ app.use((req, res, next) => {
 
 // Serve uploads statically
 app.use('/uploads', express.static('uploads'));
+
+// سرو فایل‌های استاتیک فرانت‌اند
+app.use(express.static(path.join(__dirname, '../build')));
 
 // روت دستگاه‌ها
 app.use('/api/devices', deviceRoutes);
@@ -112,17 +116,20 @@ io.on('connection', (socket) => {
 });
 app.set('userSockets', userSockets);
 
-// اتصال به دیتابیس
-mongoose.connect(process.env.MONGODB_URI, {
+// هندل سایر روت‌ها توسط React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../build', 'index.html'));
+});
+
+// اتصال به دیتابیس ابری
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('MongoDB connected');
-  // اجرای سرور
-  const PORT = process.env.PORT || 5000;
-  server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-})
-.catch((err) => {
-  console.error('DB connection error:', err);
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// اجرای سرور
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 }); 

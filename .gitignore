@@ -75,3 +75,7 @@ build/
 
 # Storybook build outputs
 .out/
+
+node_modules/
+backend/build/
+.env
